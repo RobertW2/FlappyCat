@@ -10,6 +10,7 @@ public class Level : MonoBehaviour
     private const float PIPE_MOVE_SPEED = 30f;
     private const float PIPE_DESTROY_X_POSITION = -100f;
     private const float PIPE_SPAWN_X_POSITION = 100f;
+    private const float BIRD_X_POSITION = 0f;
 
     private static Level instance;
 
@@ -20,10 +21,12 @@ public class Level : MonoBehaviour
     
 
     private List<Pipe> pipeList;
+    private int pipesPassedCount;
     private int pipesSpawned;
     private float pipeSpawnTimer;
     private float pipeSpawnTimerMax;
     private float gapSize;
+    private state State;
 
     public enum Difficulty
     {
@@ -33,23 +36,41 @@ public class Level : MonoBehaviour
         Impossible,
     }
 
+    private enum state
+    {
+        Playing,
+        BirdDead,
+    }
+
     private void Awake()
     {
         instance = this;
         pipeList = new List<Pipe>();
         pipeSpawnTimerMax = 1f;
         SetDifficulty(Difficulty.Easy);
+        State = state.Playing;
     }
 
     private void Start()
     {
+
+        Bird.GetInstance().OnDied += Bird_OnDied;
         //CreatePipe(40f, 20f, true);
       //  CreatePipe(40f, 20f, false);
      //   CreateGapPipes(50f, 20f, 20f);
     }
 
+    private void Bird_OnDied(object sender, System.EventArgs e)
+    {
+        Debug.Log("yo");
+        State = state.BirdDead;
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+    }
+
     private void Update()
     {
+        if(State == state.Playing)
         HandlePipeMovement();
         HandlePipeSpawning();
     }
@@ -79,7 +100,15 @@ public class Level : MonoBehaviour
         for (int i = 0; i < pipeList.Count; i++)
         {
             Pipe pipe = pipeList[i];
+
+            bool isToTheRightOfBird = pipe.GetXPosition() > BIRD_X_POSITION;
             pipe.Move();
+
+            if(isToTheRightOfBird && pipe.GetXPosition() <= BIRD_X_POSITION && pipe.IsBottom())
+            {
+                // Pipe that have passed the Bird
+                pipesPassedCount++;
+            }
 
 
             if (pipe.GetXPosition() < PIPE_DESTROY_X_POSITION)
@@ -179,7 +208,7 @@ public class Level : MonoBehaviour
         pipeBodyBoxCollider.size = new Vector2(PIPE_WIDTH, height);
         pipeBodyBoxCollider.offset = new Vector2(0f, height * .5f);
 
-        Pipe pipe = new Pipe(pipeHead, pipeBody);
+        Pipe pipe = new Pipe(pipeHead, pipeBody, createBottom);
         pipeList.Add(pipe);
     }
 
@@ -187,17 +216,24 @@ public class Level : MonoBehaviour
     {
         return pipesSpawned;
     }
+
+    public int GetPipesPassedCount()
+    {
+        return pipesPassedCount;
+    }
    
     // Represents Single Pipe
     private class Pipe
     {
         private Transform pipeHeadTransform;
         private Transform pipeBodyTransform;
+        private bool isBottom;
 
-        public Pipe(Transform pipeHeadTransform, Transform pipeBodyTransform)
+        public Pipe(Transform pipeHeadTransform, Transform pipeBodyTransform, bool isBottom)
         {
             this.pipeHeadTransform = pipeHeadTransform;
             this.pipeBodyTransform = pipeBodyTransform;
+            this.isBottom = isBottom;
         }
 
         public void Move()
@@ -210,6 +246,11 @@ public class Level : MonoBehaviour
         public float GetXPosition()
         {
             return pipeHeadTransform.position.x;
+        }
+
+        public bool IsBottom()
+        {
+            return isBottom;
         }
 
         public void DestroySelf()
