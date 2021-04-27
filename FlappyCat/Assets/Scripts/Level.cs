@@ -38,6 +38,7 @@ public class Level : MonoBehaviour
 
     private enum state
     {
+        WaitingToStart,
         Playing,
         BirdDead,
     }
@@ -48,16 +49,23 @@ public class Level : MonoBehaviour
         pipeList = new List<Pipe>();
         pipeSpawnTimerMax = 1f;
         SetDifficulty(Difficulty.Easy);
-        State = state.Playing;
+        State = state.WaitingToStart;
     }
 
     private void Start()
     {
 
         Bird.GetInstance().OnDied += Bird_OnDied;
+        Bird.GetInstance().OnStartedPlaying += Bird_OnStartedPlaying; ;
+
         //CreatePipe(40f, 20f, true);
-      //  CreatePipe(40f, 20f, false);
-     //   CreateGapPipes(50f, 20f, 20f);
+        //  CreatePipe(40f, 20f, false);
+        //   CreateGapPipes(50f, 20f, 20f);
+    }
+
+    private void Bird_OnStartedPlaying(object sender, System.EventArgs e)
+    {
+        State = state.Playing;
     }
 
     private void Bird_OnDied(object sender, System.EventArgs e)
@@ -65,7 +73,7 @@ public class Level : MonoBehaviour
         Debug.Log("yo");
         State = state.BirdDead;
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+      //  UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
     }
 
     private void Update()
