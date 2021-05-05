@@ -11,6 +11,7 @@ public class MouseHover : MonoBehaviour
 
 	void OnMouseUp()
 	{
+		// Start button to load game scene
 		if (isStart)
 		{
 			UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");

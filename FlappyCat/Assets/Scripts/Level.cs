@@ -30,6 +30,8 @@ public class Level : MonoBehaviour
 
     public enum Difficulty
     {
+
+        // All Difficultys that will progressivly activate.
         Easy,
         Medium,
         Hard,
@@ -38,6 +40,7 @@ public class Level : MonoBehaviour
 
     private enum state
     {
+        // Player States to assign
         WaitingToStart,
         Playing,
         BirdDead,
@@ -70,6 +73,7 @@ public class Level : MonoBehaviour
 
     private void Bird_OnDied(object sender, System.EventArgs e)
     {
+        // bird has collided and died.
         Debug.Log("yo");
         State = state.BirdDead;
 
@@ -78,6 +82,7 @@ public class Level : MonoBehaviour
 
     private void Update()
     {
+        // If currently playing start spawning pipes.
         if(State == state.Playing)
         HandlePipeMovement();
         HandlePipeSpawning();
@@ -109,6 +114,7 @@ public class Level : MonoBehaviour
         {
             Pipe pipe = pipeList[i];
 
+           
             bool isToTheRightOfBird = pipe.GetXPosition() > BIRD_X_POSITION;
             pipe.Move();
 
@@ -133,6 +139,7 @@ public class Level : MonoBehaviour
 
     private void SetDifficulty(Difficulty difficulty)
     {
+        // Makes the pipe gap smaller and speed faster.
         switch(difficulty)
         {
             case Difficulty.Easy:
@@ -155,6 +162,7 @@ public class Level : MonoBehaviour
     }
     private Difficulty GetDifficulty()
     {
+        // Get number of pipes spawned and change difficulty based on the number
         if (pipesSpawned >= 30) return Difficulty.Impossible;
         if (pipesSpawned >= 20) return Difficulty.Hard;
         if (pipesSpawned >= 10) return Difficulty.Medium;
@@ -263,6 +271,7 @@ public class Level : MonoBehaviour
 
         public void DestroySelf()
         {
+            // Removed pipe once off the screen.
             Destroy(pipeHeadTransform.gameObject);
             Destroy(pipeBodyTransform.gameObject);
         }
